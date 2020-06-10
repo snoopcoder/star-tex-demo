@@ -2,7 +2,8 @@
   "name": "star-tex",
   "private": true,
   "devDependencies": {
-    "lerna": "^3.22.1"
+    "lerna": "^3.22.1",
+    "prettier": "^2.0.5"
   },
   "scripts": {
     "postinstall": "npm run bootstrap",

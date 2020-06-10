@@ -1,20 +1,19 @@
 {
-  "plugins": [
-    "prettier",
-    "lodash"
-  ],
-  "extends": [
-    "airbnb-base",
-    "eslint:recommended",
-    "plugin:node/recommended",
-    "prettier",
-    "plugin:lodash/canonical"
-  ],
   "env": {
     "node": true
   },
   "globals": {
     "_": true
+  },
+
+  "extends": [
+    "prettier",
+    "eslint:recommended",
+    "plugin:node/recommended"
+  ],
+  "parserOptions": {
+    // Only ESLint 6.2.0 and later support ES2020.
+    "ecmaVersion": 2020
   },
   "rules": {
     "node/exports-style": ["error", "module.exports"],
@@ -28,3 +27,4 @@
     "node/prefer-promises/fs": "error"
   }
 }
+
