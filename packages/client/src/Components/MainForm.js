@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from 'react';
-import { Formik, Form } from 'formik';
+import { Formik, getIn } from 'formik';
 import { nanoid } from 'nanoid';
 
 import Button from '@material-ui/core/Button';
@@ -10,6 +10,8 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
+
+import * as Yup from 'yup';
 
 import DisplayFormikState from './DisplayFormikState';
 
@@ -28,7 +30,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const MemoRow = React.memo(function Row({ order, index, onChange }) {
+const MemoRow = React.memo(function Row({ order, errors, index, onChange }) {
   const classes = useStyles();
   const onChangeHandler = (option) => ({ target: { value } }) => {
     onChange(`orders.${index}`, { ...order, [option]: value });
@@ -41,6 +43,7 @@ const MemoRow = React.memo(function Row({ order, index, onChange }) {
         <Grid item container xs={12} spacing={4}>
           <Grid item xs={4}>
             <TextField
+              error={getIn(errors, 'w')}
               fullWidth
               helperText="Ширина"
               value={order.w}
@@ -54,6 +57,7 @@ const MemoRow = React.memo(function Row({ order, index, onChange }) {
           </Grid>
           <Grid item xs={4}>
             <TextField
+              error={getIn(errors, 'h')}
               fullWidth
               helperText="Высота"
               value={order.h}
@@ -67,6 +71,7 @@ const MemoRow = React.memo(function Row({ order, index, onChange }) {
           </Grid>
           <Grid item xs={4}>
             <TextField
+              error={getIn(errors, 'l')}
               fullWidth
               helperText="Длина"
               value={order.l}
@@ -82,6 +87,7 @@ const MemoRow = React.memo(function Row({ order, index, onChange }) {
         <Grid item container xs={12} spacing={4}>
           <Grid item xs={12}>
             <TextField
+              error={getIn(errors, 'weight')}
               fullWidth
               helperText="Вес"
               value={order.weight}
@@ -99,7 +105,7 @@ const MemoRow = React.memo(function Row({ order, index, onChange }) {
   );
 });
 
-const FormInner = ({ values, setFieldValue, ...other }) => {
+const FormInner = ({ values, errors, setFieldValue, ...other }) => {
   const onTotalCountChange = React.useCallback(
     ({ target: { value } }) => {
       if (Number.isInteger(+value) && value < 20) {
@@ -112,14 +118,15 @@ const FormInner = ({ values, setFieldValue, ...other }) => {
           item.reactKey ? item : { ...item, reactKey: nanoid() },
         );
         setFieldValue('totalCount', Number(value));
-        setFieldValue('orders', data);
+        setFieldValue('orders', data, false);
       }
     },
     [values, setFieldValue],
   );
   return (
-    <Form>
+    <div>
       <TextField
+        error={getIn(errors, 'totalCount')}
         variant="outlined"
         label="Количество мест"
         value={values.totalCount}
@@ -129,6 +136,7 @@ const FormInner = ({ values, setFieldValue, ...other }) => {
       <Box pt={3} pb={3}>
         {values.orders.map((order, index) => (
           <MemoRow
+            errors={getIn(errors, `orders.${index}`)}
             key={order.reactKey}
             order={order}
             index={index}
@@ -136,17 +144,39 @@ const FormInner = ({ values, setFieldValue, ...other }) => {
           />
         ))}
         {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-        <DisplayFormikState values={values} {...other} />
+        <DisplayFormikState values={values} errors={errors} {...other} />
       </Box>
-    </Form>
+    </div>
   );
 };
+
+const realParameter = Yup.number()
+  .required('Необходимо значение')
+  .positive()
+  .integer()
+  .min(1, 'Значение в диапазоне от 1 до 100')
+  .max(100, 'Значение в диапазоне от 1 до 100');
+
+const schema = Yup.object().shape({
+  totalCount: Yup.number().required().min(1),
+  orders: Yup.array()
+    .of(
+      Yup.object().shape({
+        w: realParameter,
+        h: realParameter,
+        l: realParameter,
+        weight: realParameter,
+      }),
+    )
+    .min(1),
+});
 
 const MainFormik = () => {
   return (
     <Box p={3}>
       <Formik
         initialValues={{ orders: [], totalCount: '' }}
+        validationSchema={schema}
         onSubmit={(values) =>
           setTimeout(() => {
             alert(JSON.stringify(values, null, 2));
@@ -154,11 +184,17 @@ const MainFormik = () => {
         }
       >
         {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-        {(props) => <FormInner {...props} />}
+        {({ handleSubmit, isSubmitting, ...other }) => (
+          <form onSubmit={handleSubmit}>
+            <FormInner isSubmitting={isSubmitting} {...other} />
+            <Box display="flex" justifyContent="flex-end">
+              <Button type="submit" disabled={isSubmitting} variant="contained">
+                Создать
+              </Button>
+            </Box>
+          </form>
+        )}
       </Formik>
-      <Box display="flex" justifyContent="flex-end">
-        <Button variant="contained">Создать</Button>
-      </Box>
     </Box>
   );
 };
