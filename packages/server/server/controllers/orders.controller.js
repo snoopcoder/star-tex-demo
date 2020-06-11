@@ -1,5 +1,6 @@
 const fs = require("fs");
-const strftime = require('strftime')
+const strftime = require("strftime");
+const sendBySocket = require("../../config/socket");
 /**
  * Create new order
  * @property {string} req.body.id - token.
@@ -13,7 +14,11 @@ function create(req, res, next) {
     `output/${strftime("%Y%m%d-%H%M%S")}-${req.body.id}.txt`,
     JSON.stringify(req.body.orders),
     function (error) {
-      if (error) console.log(error); // если возникла ошибка
+      if (error) {
+        console.log(error);
+      } else {
+        sendBySocket(req.body.id, "Заказ успешно создан");
+      }
     }
   );
   res.send({ success: true });
