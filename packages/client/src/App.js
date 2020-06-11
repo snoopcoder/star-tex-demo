@@ -11,6 +11,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 
 import TokenLoader from './Components/TokenLoader';
 import MainForm from './Components/MainForm';
+import WebSocket from './Components/WebSocket';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,7 +57,12 @@ function App() {
             <Grid item xs={false} md={2} xl={3} />
             <Grid item xs={12} md={8} xl={6}>
               <TokenLoader>
-                {({ token }) => <MainForm token={token} />}
+                {({ token }) => (
+                  <>
+                    <WebSocket token={token} />
+                    <MainForm token={token} />
+                  </>
+                )}
               </TokenLoader>
             </Grid>
           </Grid>
