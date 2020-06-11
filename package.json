@@ -1,0 +1,16 @@
+{
+  "name": "star-tex",
+  "private": true,
+  "devDependencies": {
+    "lerna": "^3.22.1",
+    "prettier": "^2.0.5"
+  },
+  "scripts": {
+    "postinstall": "npm run bootstrap",
+    "bootstrap": "lerna bootstrap --no-ci",
+    "start": "lerna run start --parallel --scope @star-tex/server --scope @star-tex/client",
+    "start:client": "lerna run start --scope=@star-tex/client",
+    "start:server": "lerna run start:dev --stream --scope=@star-tex/server",
+    "lint": "lerna run lint --parallel"
+  }
+}
