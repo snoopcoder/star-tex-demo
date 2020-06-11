@@ -10,8 +10,8 @@ const strftime = require('strftime')
 function create(req, res, next) {
   // eslint-disable-next-line node/prefer-promises/fs
   fs.writeFile(
-    `output/${strftime("%Y%m%d-%H%M%S")}.txt`,
-    JSON.stringify(req.body.places),
+    `output/${strftime("%Y%m%d-%H%M%S")}-${req.body.id}.txt`,
+    JSON.stringify(req.body.orders),
     function (error) {
       if (error) console.log(error); // если возникла ошибка
     }

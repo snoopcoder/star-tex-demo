@@ -13,8 +13,6 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 
 import * as Yup from 'yup';
 
-import DisplayFormikState from './DisplayFormikState';
-
 const useStyles = makeStyles(() => ({
   itemRow: {
     position: 'relative',
@@ -33,7 +31,7 @@ const useStyles = makeStyles(() => ({
 const MemoRow = React.memo(function Row({ order, errors, index, onChange }) {
   const classes = useStyles();
   const onChangeHandler = (option) => ({ target: { value } }) => {
-    onChange(`orders.${index}`, { ...order, [option]: value });
+    onChange(`orders.${index}`, { ...order, [option]: value }, true);
   };
 
   return (
@@ -105,7 +103,7 @@ const MemoRow = React.memo(function Row({ order, errors, index, onChange }) {
   );
 });
 
-const FormInner = ({ values, errors, setFieldValue, ...other }) => {
+const FormInner = ({ values, errors, setFieldValue, submitCount }) => {
   const onTotalCountChange = React.useCallback(
     ({ target: { value } }) => {
       if (Number.isInteger(+value) && value < 20) {
@@ -117,7 +115,7 @@ const FormInner = ({ values, errors, setFieldValue, ...other }) => {
         ].map((item) =>
           item.reactKey ? item : { ...item, reactKey: nanoid() },
         );
-        setFieldValue('totalCount', Number(value));
+        setFieldValue('totalCount', Number(value), false);
         setFieldValue('orders', data, false);
       }
     },
@@ -144,7 +142,6 @@ const FormInner = ({ values, errors, setFieldValue, ...other }) => {
           />
         ))}
         {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-        <DisplayFormikState values={values} errors={errors} {...other} />
       </Box>
     </div>
   );
@@ -171,22 +168,45 @@ const schema = Yup.object().shape({
     .min(1),
 });
 
-const MainFormik = () => {
+const MainFormik = ({ token }) => {
+  const save = (values, setSubmitting, resetForm) => {
+    fetch('http://localhost:4040/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+      body: JSON.stringify({
+        id: token,
+        orders: values.orders,
+      }),
+    })
+      .then((response) => response.json())
+      .then(({ success }) => {
+        if (success) {
+          setSubmitting(false);
+          resetForm();
+        }
+      });
+  };
   return (
     <Box p={3}>
       <Formik
+        validateOnChange={false}
         initialValues={{ orders: [], totalCount: '' }}
         validationSchema={schema}
-        onSubmit={(values) =>
-          setTimeout(() => {
-            alert(JSON.stringify(values, null, 2));
-          }, 500)
-        }
+        onSubmit={(values, { setSubmitting, resetForm }) => {
+          setSubmitting(true);
+          save(values, setSubmitting, resetForm);
+        }}
       >
         {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-        {({ handleSubmit, isSubmitting, ...other }) => (
+        {({ handleSubmit, isSubmitting, submitCount, ...other }) => (
           <form onSubmit={handleSubmit}>
-            <FormInner isSubmitting={isSubmitting} {...other} />
+            <FormInner
+              isSubmitting={isSubmitting}
+              submitCount={submitCount}
+              {...other}
+            />
             <Box display="flex" justifyContent="flex-end">
               <Button type="submit" disabled={isSubmitting} variant="contained">
                 Создать
