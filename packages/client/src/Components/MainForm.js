@@ -106,6 +106,7 @@ const MemoRow = React.memo(function Row({ order, errors, index, onChange }) {
 const FormInner = ({ values, errors, setFieldValue, submitCount }) => {
   const onTotalCountChange = React.useCallback(
     ({ target: { value } }) => {
+      setFieldValue('totalCount', Number(value), submitCount > 0);
       if (Number.isInteger(+value) && value < 20) {
         let data = values.orders.slice(0, value);
         const delta = value > data.length ? value - data.length : 0;
@@ -115,11 +116,10 @@ const FormInner = ({ values, errors, setFieldValue, submitCount }) => {
         ].map((item) =>
           item.reactKey ? item : { ...item, reactKey: nanoid() },
         );
-        setFieldValue('totalCount', Number(value), false);
         setFieldValue('orders', data, false);
       }
     },
-    [values, setFieldValue],
+    [values, setFieldValue, submitCount],
   );
   const setFieldValueMemo = React.useCallback(
     (id, value) => {
@@ -205,15 +205,20 @@ const MainFormik = ({ token }) => {
           save(values, setSubmitting, resetForm);
         }}
       >
-        {({ handleSubmit, isSubmitting, submitCount, ...other }) => (
+        {({ values, handleSubmit, isSubmitting, submitCount, ...other }) => (
           <form onSubmit={handleSubmit}>
             <FormInner
+              values={values}
               isSubmitting={isSubmitting}
               submitCount={submitCount}
               {...other}
             />
             <Box display="flex" justifyContent="flex-end">
-              <Button type="submit" disabled={isSubmitting} variant="contained">
+              <Button
+                type="submit"
+                disabled={isSubmitting || !values.totalCount}
+                variant="contained"
+              >
                 Создать
               </Button>
             </Box>
