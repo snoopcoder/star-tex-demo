@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+/* eslint-disable react/prop-types,react/jsx-props-no-spreading */
 import React from 'react';
 import { Formik, getIn } from 'formik';
 import { nanoid } from 'nanoid';
@@ -31,7 +31,7 @@ const useStyles = makeStyles(() => ({
 const MemoRow = React.memo(function Row({ order, errors, index, onChange }) {
   const classes = useStyles();
   const onChangeHandler = (option) => ({ target: { value } }) => {
-    onChange(`orders.${index}`, { ...order, [option]: value }, true);
+    onChange(`orders.${index}`, { ...order, [option]: value });
   };
 
   return (
@@ -41,7 +41,7 @@ const MemoRow = React.memo(function Row({ order, errors, index, onChange }) {
         <Grid item container xs={12} spacing={4}>
           <Grid item xs={4}>
             <TextField
-              error={getIn(errors, 'w')}
+              error={!!getIn(errors, 'w')}
               fullWidth
               helperText="Ширина"
               value={order.w}
@@ -55,7 +55,7 @@ const MemoRow = React.memo(function Row({ order, errors, index, onChange }) {
           </Grid>
           <Grid item xs={4}>
             <TextField
-              error={getIn(errors, 'h')}
+              error={!!getIn(errors, 'h')}
               fullWidth
               helperText="Высота"
               value={order.h}
@@ -69,7 +69,7 @@ const MemoRow = React.memo(function Row({ order, errors, index, onChange }) {
           </Grid>
           <Grid item xs={4}>
             <TextField
-              error={getIn(errors, 'l')}
+              error={!!getIn(errors, 'l')}
               fullWidth
               helperText="Длина"
               value={order.l}
@@ -85,7 +85,7 @@ const MemoRow = React.memo(function Row({ order, errors, index, onChange }) {
         <Grid item container xs={12} spacing={4}>
           <Grid item xs={12}>
             <TextField
-              error={getIn(errors, 'weight')}
+              error={!!getIn(errors, 'weight')}
               fullWidth
               helperText="Вес"
               value={order.weight}
@@ -121,10 +121,16 @@ const FormInner = ({ values, errors, setFieldValue, submitCount }) => {
     },
     [values, setFieldValue],
   );
+  const setFieldValueMemo = React.useCallback(
+    (id, value) => {
+      setFieldValue(id, value, submitCount);
+    },
+    [setFieldValue, submitCount],
+  );
   return (
     <div>
       <TextField
-        error={getIn(errors, 'totalCount')}
+        error={!!getIn(errors, 'totalCount')}
         variant="outlined"
         label="Количество мест"
         value={values.totalCount}
@@ -138,7 +144,7 @@ const FormInner = ({ values, errors, setFieldValue, submitCount }) => {
             key={order.reactKey}
             order={order}
             index={index}
-            onChange={setFieldValue}
+            onChange={setFieldValueMemo}
           />
         ))}
         {/* eslint-disable-next-line react/jsx-props-no-spreading */}
@@ -199,7 +205,6 @@ const MainFormik = ({ token }) => {
           save(values, setSubmitting, resetForm);
         }}
       >
-        {/* eslint-disable-next-line react/jsx-props-no-spreading */}
         {({ handleSubmit, isSubmitting, submitCount, ...other }) => (
           <form onSubmit={handleSubmit}>
             <FormInner
