@@ -106,9 +106,9 @@ const MemoRow = React.memo(function Row({ order, errors, index, onChange }) {
 const FormInner = ({ values, errors, setFieldValue, submitCount }) => {
   const onTotalCountChange = React.useCallback(
     ({ target: { value } }) => {
-      setFieldValue('totalCount', Number(value), submitCount > 0);
       if (Number.isInteger(+value) && value < 20) {
-        let data = values.orders.slice(0, value);
+          setFieldValue('totalCount', Number(value), submitCount > 0);
+          let data = values.orders.slice(0, value);
         const delta = value > data.length ? value - data.length : 0;
         data = [
           ...data,
