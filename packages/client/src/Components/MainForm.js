@@ -12,6 +12,7 @@ import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 
 import * as Yup from 'yup';
+import config from '../config';
 
 const useStyles = makeStyles(() => ({
   itemRow: {
@@ -107,8 +108,8 @@ const FormInner = ({ values, errors, setFieldValue, submitCount }) => {
   const onTotalCountChange = React.useCallback(
     ({ target: { value } }) => {
       if (Number.isInteger(+value) && value < 20) {
-          setFieldValue('totalCount', Number(value), submitCount > 0);
-          let data = values.orders.slice(0, value);
+        setFieldValue('totalCount', Number(value), submitCount > 0);
+        let data = values.orders.slice(0, value);
         const delta = value > data.length ? value - data.length : 0;
         data = [
           ...data,
@@ -176,7 +177,7 @@ const schema = Yup.object().shape({
 
 const MainFormik = ({ token }) => {
   const save = (values, setSubmitting, resetForm) => {
-    fetch('http://localhost:4040/api/orders', {
+    fetch(`${config.restApi}/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json;charset=utf-8',
