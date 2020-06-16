@@ -6,15 +6,14 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
-
-const ENDPOINT = 'http://127.0.0.1:7000';
+import config from '../config';
 
 // eslint-disable-next-line react/prop-types
 function App({ token }) {
   const [message, setMessage] = React.useState(null);
   React.useEffect(() => {
     if (token) {
-      const socket = socketIOClient(ENDPOINT);
+      const socket = socketIOClient(config.socketApi);
       socket.on('init', () => {
         socket.emit('init', token);
       });
